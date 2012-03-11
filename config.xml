@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+	<modules>
+		<Foo_Bar>
+		<!--
+			This is the module name. "Foo" is the namespace and "Bar" is the actual module name
+			Namespace and module name need to match the folder names in the code configured code pool
+		-->
+
+			<active>true</active>
+			<codePool>community</codePool>
+			<!--
+				Code pool can be one of "local", "community", "core"
+			-->
+
+			<!--
+				config/modules/Foo_Bar/active
+				and config/modules/Foo_Bar/codePool is the minimum information Magento needs
+				to find the config.xml inside your module. While all other stuff is configured
+				in app/code/community/Foo/Bar/etc/config.xml this information is to be defined
+				in app/etc/modules/Foo_Bar.xml
+			-->
+
+			<version>0.1.0</version>
+			<!--
+				This version number will be stored in core_resources after the module has
+				been installed successfully. Based on this version number and the version number
+				in the database tables this upgrade scripts will be executed.
+			-->
+		</Foo_Bar>
+	</modules>
+</config>
