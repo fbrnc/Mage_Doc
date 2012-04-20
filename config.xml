@@ -34,7 +34,7 @@
 
 		<helpers>
 			<!--
-				"foo_bar" is the so called class group. You can choose it freely and it is used
+				"foobar" is the so called class group. You can choose it freely and it is used
 				to instanciate classes later. Best practice is to use the module name in lowercase letters
 			-->
 			<foobar>
@@ -55,10 +55,100 @@
 		</models>
 
 		<resources>
+
+			<db>
+				<!--
+					Usually defined in app/etc/local.xml
+					Contains the instance specific prefix that is used to access all tables
+					Empty by default
+
+					@see Mage_Core_Model_Config->getTablePrefix()
+				-->
+				<table_prefix></table_prefix>
+			</db>
+
+			<!--
+			 	Database configuration:
+
+			 	default_setup is configured in app/etc/local.xml
+
+			 	@see Mage_Core_Model_Config->getResourceConfig($name)
+			-->
+			<default_setup>
+				<connection>
+					<host><![CDATA[localhost]]></host>
+					<username><![CDATA[magento]]></username>
+					<password><![CDATA[secret]]></password>
+					<dbname><![CDATA[magento]]></dbname>
+					<initStatements><![CDATA[SET NAMES utf8]]></initStatements>
+					<!-- TODO: what models are available? -->
+					<model><![CDATA[mysql4]]></model>
+					<!-- TODO: what types are available? -->
+					<type><![CDATA[pdo_mysql]]></type>
+					<!-- TODO: what is the pdoType? -->
+					<pdoType><![CDATA[]]></pdoType>
+					<active>1</active>
+				</connection>
+			</default_setup>
+
+
+			<!--
+				But there are some more database handles configured in app/etc/config.xml
+				that by default all reference default_setup
+
+				default_write (uses default_setup)
+				default_read  (uses default_setup)
+				core_setup    (uses default_setup)
+				core_write    (uses default_write)
+				core_read     (uses default_read)
+			-->
+			<default_write>
+				<connection>
+					<!--
+						other handles can be referenced using "use"
+
+						@see Mage_Core_Model_Config->getResourceConnectionConfig($name)
+						If "use" is specified the connection data from the specified resource is
+						loaded recursively
+					-->
+					<use>default_setup</use>
+				</connection>
+			</default_write>
+
+			<core_setup>
+				<!-- TODO: what's "setup" -->
+				<setup>
+					<module>Mage_Core</module>
+				</setup>
+				<connection>
+					<use>default_setup</use>
+				</connection>
+			</core_setup>
+
+			<!--
+				TODO: what's the difference between the default_* and the core_* handles? Where are they used?
+			-->
+
+
 			<foobar_setup>
+			<!--
+				"foobar_setup" has to be a unique key that can be chosen freely.
+				A folder with the same name needs to be in place in
+				app/code/community/Foo/Bar/sql/foobar_setup and/or
+				app/code/community/Foo/Bar/data/foobar_setup
+
+				TODO: Describe the files that are located in those folders
+				(install-...php, mysql4-upgrade-...-...php,...)
+			-->
 				<setup>
 					<module>Foo_Bar</module>
 					<class>Mage_Catalog_Model_Resource_Setup</class>
+					<!--
+						"class" default to Mage_Core_Model_Resource_Setup and can be overridden here
+
+						@see Mage_Core_Model_Resource_Setup->applyAllUpdates() (called in Mage_Core_Model_App::_initModules())
+						@see Mage_Core_Model_Resource_Setup->applyDataUpdates() (called in Mage_Core_Model_App::run())
+					-->
 				</setup>
 			</foobar_setup>
 		</resources>
