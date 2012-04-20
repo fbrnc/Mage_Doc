@@ -29,4 +29,40 @@
 			-->
 		</Foo_Bar>
 	</modules>
+
+	<global>
+
+		<helpers>
+			<!--
+				"foo_bar" is the so called class group. You can choose it freely and it is used
+				to instanciate classes later. Best practice is to use the module name in lowercase letters
+			-->
+			<foobar>
+				<class>Foo_Bar_Helper</class>
+			</foobar>
+		</helpers>
+
+		<blocks>
+			<foobar>
+				<class>Foo_Bar_Block</class>
+			</foobar>
+		</blocks>
+
+		<models>
+			<foobar>
+				<class>Foo_Bar_Model</class>
+			</foobar>
+		</models>
+
+		<resources>
+			<foobar_setup>
+				<setup>
+					<module>Foo_Bar</module>
+					<class>Mage_Catalog_Model_Resource_Setup</class>
+				</setup>
+			</foobar_setup>
+		</resources>
+
+	</global>
+
 </config>
