@@ -1,6 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+
+This file is merged together out of many XML files. Those files are loaded in alphabetical order taking
+module dependencies into account.
+
+TODO: describe other global files and their load order
+
+Access configuration values:
+TODO: provide examples
+- $store->getConfig($path);
+- Mage::getStoreConfig($path [, $store]);
+- Mage::getStoreConfigFlag($path [, $store]);
+- (Accessing by absolute path) Mage::getConfig()->getNode($path [, $store]);
+
+-->
+
 <config>
+	<!-- Root node -->
+
 	<modules>
+	<!-- Contains modules declarations (names, statuses, dependencies) -->
+
 		<Foo_Bar>
 		<!--
 			This is the module name. "Foo" is the namespace and "Bar" is the actual module name
@@ -31,16 +52,32 @@
 	</modules>
 
 	<global>
+		<!-- Contains definitions that should be shared between all scopes -->
 
-		<helpers>
+		<!--
+			TODO: provide concrete examples
+		 	- Main database settings
+		 	- Connection types
+		 	- Database adapters
+		 	- Core modules class names
+		-->
+
+		<models>
 			<!--
 				"foobar" is the so called class group. You can choose it freely and it is used
-				to instanciate classes later. Best practice is to use the module name in lowercase letters
+				to instanciate classes later. Best practice is to use the module name in lowercase letters.
+				Same for blocks and helpers.
+
+				Example:
+				Mage::getModel('foobar/model');
 			-->
 			<foobar>
 				<class>Foo_Bar_Helper</class>
+				<!-- This is the prefix that will substiture the classgroup when accessing a model -->
+
+				<resourceModel></resourceModel>
 			</foobar>
-		</helpers>
+		</models>
 
 		<blocks>
 			<foobar>
@@ -48,11 +85,11 @@
 			</foobar>
 		</blocks>
 
-		<models>
+		<helpers>
 			<foobar>
 				<class>Foo_Bar_Model</class>
 			</foobar>
-		</models>
+		</helpers>
 
 		<resources>
 
@@ -154,5 +191,45 @@
 		</resources>
 
 	</global>
+
+	<default>
+		<!-- Contains definitions shared between all stores configuration -->
+
+		<!--
+			TODO: provide concrete examples
+			- Directory structure, real folder names
+			- System locale
+			- Design and theme configuration
+			- System options
+		-->
+
+		<!--
+			Access this configuration using Mage_Core_Model_Config
+			@see Varien_Simplexml_Element
+		-->
+	</default>
+
+	<!-- TODO: How to add store specific configuration? -->
+
+	<frontend>
+		<!-- Contains definitions that are only required for the frontend -->
+
+		<!--
+			TODO: provide concrete examples
+			- Routers
+			- Translation files
+			- Layout xml files
+			- Observer declarations
+		-->
+	</frontend>
+
+	<admin><!-- TODO: where is admin used and where adminhtml? -->
+		<!-- Contains definitions that are only required for the backend -->
+	</admin>
+
+	<catalog>
+		<!-- Contains definitions for Mage_Catalog -->
+	</catalog>
+
 
 </config>
