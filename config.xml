@@ -69,25 +69,127 @@ TODO: provide examples
 				Same for blocks and helpers.
 
 				Example:
-				Mage::getModel('foobar/model');
+				Mage::getModel('foobar/example');
+
+				Singleton:
+				Mage::getSingleton('foobar/example');
 			-->
 			<foobar>
-				<class>Foo_Bar_Helper</class>
+				<class>Foo_Bar_Model</class>
 				<!-- This is the prefix that will substiture the classgroup when accessing a model -->
 
-				<resourceModel></resourceModel>
+				<resourceModel>foobar_resource</resourceModel>
+				<!-- The resource model points to another classgroup that is used to load the corresponding resource model -->
+
+				<rewrite>
+					<example>Bar_Foo_Model_Example</example>
+					<!--
+						Rewrite class Foo_Bar_Model_Example with class Bar_Foo_Model_Example.
+						Rewrite usually are done in other modules to extend or change the behaviour of the original class.
+						In this example module "Bar_Foo" would override "Foo_Bar's" class "example".
+
+						Rewrites must be configured in the original class group namespace.
+
+						Xpath: config/global/models/<classgroup>/rewrite/<classname>: new classname
+
+						Hint: Override classnames are always normal php class names. Magento's classgroup syntax is not
+						supported here.
+					-->
+				</rewrite>
+
 			</foobar>
+
+			<foobar_resource>
+				<!-- This resource model is configured to be used in config/global/models/foobar/resourceModel -->
+
+				<!--
+					Example:
+					Mage::getResourceModel('foobar/example');
+
+					Singleton:
+					Mage::getResourceSingleton('foobar/example');
+				-->
+
+				<!-- A resource model basically is a normal model with all features of a model -->
+				<class>Foo_Bar_Model_Resource</class>
+				<!--
+					Example:
+					Mage::getResourceModel('foobar/example') will do a lookup at config/global/models/foobar/resourceModel
+					and will call Mage::getModel('foobar_resource/example') then and use this as a resource model.
+					"foobar_resource/model" will be resolved to Foo_Bar_Model_Resource_Example (unless rewritten)
+				-->
+				<deprecatedNode>foobar_mysql4</deprecatedNode>
+				<!--
+
+					Backwards compatibility for pre-MMDB extensions.
+					In MMDB release resource nodes <..._mysql4> were renamed to <..._resource>. So <deprecatedNode> is left
+					to keep name of previously used nodes, that still may be used by non-updated extensions
+
+					@see Mage_Core_Model_Config::getGroupedClassName()
+					@see Mage_Core_Model_Resource::getEntity($model, $entity)
+				-->
+
+				<entities>
+					<example><!-- Entity name -->
+						<table>foobar_example</table>
+						<!-- This points to a concrete table name -->
+					</example>
+				</entities>
+				<!--
+					TODO: add example on how to access table names in php code
+				-->
+
+				<rewrite>
+					<example>Bar_Foo_Model_Resource_Example</example>
+					<!--
+						Resource models can alse be rewritten. Also check config/global/models/foobar/rewrite
+						for more information on rewrites.
+
+						Hint: while rewriting a resource model like this will only affect the resource model
+						of the given class you can change the resource models for the complete module by changing/overwriting
+						the value in config/global/models/foobar/resourceModel
+					-->
+				</rewrite>
+
+			</foobar_resource>
+
 		</models>
 
 		<blocks>
 			<foobar>
 				<class>Foo_Bar_Block</class>
+
+				<rewrite>
+					<example>Bar_Foo_Block_Example</example>
+					<!--
+						Will rewrite Foo_Bar_Block_Example to Bar_Foo_Block_Example.
+
+						I.e. Mage::app()->getLayout()->createBlock('foobar/example') will return an instance of Bar_Foo_Block_Example
+						instead of Foo_Bar_Block_Example
+
+						Also check config/global/models/foobar/rewrite for more information on rewrites.
+					-->
+				</rewrite>
+
 			</foobar>
 		</blocks>
 
 		<helpers>
 			<foobar>
-				<class>Foo_Bar_Model</class>
+				<class>Foo_Bar_Helper</class>
+
+				<rewrite>
+					<example>Bar_Foo_Helper_Example</example>
+					<!--
+						Will rewrite Foo_Bar_Helper_Example to Bar_Foo_Helper_Example.
+
+						I.e. Mage::helper('foobar/example') will return an instance of Bar_Foo_Helper_Example
+						instead of Foo_Bar_Helper_Example
+
+						Also check config/global/models/foobar/rewrite for more information on rewrites.
+					-->
+				</rewrite>
+
 			</foobar>
 		</helpers>
 
