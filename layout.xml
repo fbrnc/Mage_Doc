@@ -1,4 +1,187 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<layout>
+
+<!--
+	All layout files will be merged together into one big xml structure
+
+	Add new files to be merged be configuring them in config.xml under
+	config/frontend/layout/updates/<customKey>/file: filename
+-->
+<layout version="0.1.0"><!-- root node -->
+	<!-- TODO: what effect has "version"? -->
+
+	<default translate="label" module="page">
+		<!--
+			This is the default handle that is always loaded. Most configuration that is valid for all parts of the
+			shop will be configured here
+		-->
+
+		<!-- TODO: describe attributes label and module -->
+
+		<!--
+			Basic directives
+			- block: Block declaration
+			- action: Allows to call any method from target block
+			- reference: Reference's content will be merged into target block. Attribute "name" specifies the referenced block name
+			- update: merge to the current handle all directives from target handle
+			- remove: set ignore flag for the target block
+			- label: (used in adminhtml only?)
+		-->
+
+		<block type="page/html" name="root" output="toHtml" template="page/3columns.phtml">
+
+			<!--
+				Required attributes for the <block>:
+				- type/class	Block class name, which used for factory method
+				- name			A name by which other blocks can make reference to this block
+
+				Optional attributes:
+				- as			Block alias name
+				- parent		Parent block name. Used for adding current block into specified parent block (can also be done using nesting)
+				- output		Method for block output rendering. E.g. "toHtml"
+				 				TODO: what other values are possible here?
+
+				For core/test_list parent blocks
+				- before		Block name or "-". Used for adding current block before the block specified
+				- after			Block name or "-". Used for adding current block after the block specified
+
+				For core/template parent blocks
+				- template		Template (*.phtml) file path
+			-->
+
+			<!--
+				Difference between name and alias
+				The alias must be unique inside the parent block.
+
+				$this->getLayout()->getBlock($name);
+				$this->getLayout()->getBlock(...)->getChild($alias);
+			-->
+
+			<!-- Blocks can be nested: -->
+			<block type="page/html_head" name="head" as="head">
+
+				<!--
+					Actions directive
+
+					@see Mage_Core_Model_Layout::_generateAction()
+				-->
+
+				<!--
+					Will result in:
+
+					$block = Mage::app()->getLayout()->createBlock('page/html_head', 'head');
+					if (Mage::getStoreConfigFlag('dev/js/deprecation')) {
+						$block->addJs('prototype/deprecation.js');
+					}
+				-->
+				<action method="addJs" ifconfig="dev/js/deprecation">
+					<!--
+						Required attribute
+						- method		block method name
+
+						Optional attributes
+						- translate		attribute used for method arguments translation
+						- module		Module name used to instantiate helper for translation. Defaults to Mage_Core
+						- helper		helper name with helper method
+						- json			json values which need to be decoded
+						- ifconfig		check configuration first
+					-->
+
+					<!--
+						TODO: add example for json processing
+					-->
+					<param1>prototype/deprecation.js</param1>
+					<!--
+						<tag>-enclosed text nodes inside <action> will be passed in order to the method. The name of the
+						tag is not of any importance. Add empty tags if you need to skip a parameter.
+					-->
+				</action>
+
+				<!--
+					Will result in
+
+					$block->setFooArray(
+						'foo',
+						array(
+							'key1' => 'value1',
+							'key2' => 'value2',
+						)
+					);
+				-->
+				<action method="setFooArray">
+					<param1>foo</param1>
+					<param2>
+						<key1>value1</key1><!-- Tag name will be used as array key -->
+						<key2>value2</key2>
+					</param2>
+				</action>
+
+			</block>
+
+			<!--
+				Remove directive
+
+				Once a block has been removed it won't be rendered anywhere for this request.
+
+				Note: compare to unsetChild
+			-->
+			<remove name="right" />
+
+		</block>
+
+		<!--
+			Action can also be configured outside blocks:
+			TODO: how to refer to parent block?
+		-->
+		<action method="addJs" >
+			<param1>prototype/deprecation.js</param1>
+		</action>
+
+		<!--
+			Referencing another block and add configuration to that one
+		-->
+		<reference name="left">
+
+		</reference>
+
+
+	</default>
+
+
+
+	<!-- ===============================
+		Dynamic handles
+	================================ -->
+
+	<!--
+		Store specific:
+
+		@see Mage_Core_Controller_Varien_Action::addActionLayoutHandles()
+		'STORE_'.Mage::app()->getStore()->getCode()
+	-->
+	<STORE_code>
+
+	</STORE_code>
+
+	<!--
+		Theme specific
+
+		@see Mage_Core_Controller_Varien_Action::addActionLayoutHandles()
+		'THEME_'.$package->getArea().'_'.$package->getPackageName().'_'.$package->getTheme('layout')
+	-->
+	<THEME_area_package_theme><!-- e.g. THEME_frontend_base_default -->
+
+	</THEME_area_package_theme>
+
+
+	<!--
+		Full action name
+
+		@see Mage_Core_Controller_Varien_Action::addActionLayoutHandles()
+		strtolower($this->getFullActionName())
+	-->
+	<full_action_name><!-- e.g. catalog_category_view -->
+
+	</full_action_name>
+
 
 </layout>

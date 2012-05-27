@@ -16,11 +16,9 @@ TODO: provide examples
 
 -->
 
-<config>
-	<!-- Root node -->
+<config><!-- Root node -->
 
-	<modules>
-	<!-- Contains modules declarations (names, statuses, dependencies) -->
+	<modules><!-- Contains modules declarations (names, statuses, dependencies) -->
 
 		<Foo_Bar>
 		<!--
@@ -48,6 +46,17 @@ TODO: provide examples
 				been installed successfully. Based on this version number and the version number
 				in the database tables this upgrade scripts will be executed.
 			-->
+
+			<depends>
+				<!--
+					Configure dependicies to other modules here. Those dependencies will be taken into account
+					for the order of loading the modules
+					Mage_Core will be always loaded first.
+				-->
+
+				<Mage_Customer />
+				<Mage_Checkeout />
+			</depends>
 		</Foo_Bar>
 	</modules>
 
@@ -79,7 +88,11 @@ TODO: provide examples
 				<!-- This is the prefix that will substiture the classgroup when accessing a model -->
 
 				<resourceModel>foobar_resource</resourceModel>
-				<!-- The resource model points to another classgroup that is used to load the corresponding resource model -->
+				<!--
+					The resource model points to another classgroup that is used to load the corresponding resource model
+
+					By convention the suffix of the resource model classgroup is "_resource".
+				-->
 
 				<rewrite>
 					<example>Bar_Foo_Model_Example</example>
@@ -104,10 +117,11 @@ TODO: provide examples
 
 				<!--
 					Example:
-					Mage::getResourceModel('foobar/example');
+					Mage::getResourceModel('foobar/example'[, $args]);
 
 					Singleton:
-					Mage::getResourceSingleton('foobar/example');
+					Mage::getResourceSingleton('foobar/example'[, $args]);
+					note: $args will be ignored if the object was instantiated before and will be delievered from the registry instead
 				-->
 
 				<!-- A resource model basically is a normal model with all features of a model -->
@@ -130,13 +144,13 @@ TODO: provide examples
 				-->
 
 				<entities>
-					<example><!-- Entity name -->
+					<exampletable><!-- Entity name -->
 						<table>foobar_example</table>
 						<!-- This points to a concrete table name -->
-					</example>
+					</exampletable>
 				</entities>
 				<!--
-					TODO: add example on how to access table names in php code
+					Mage::getResourceModel('foobar/example')->getTable('foobar/exampletable'); will return foobar_example
 				-->
 
 				<rewrite>
@@ -220,7 +234,13 @@ TODO: provide examples
 					<password><![CDATA[secret]]></password>
 					<dbname><![CDATA[magento]]></dbname>
 					<initStatements><![CDATA[SET NAMES utf8]]></initStatements>
-					<!-- TODO: what models are available? -->
+					<!--
+						Since Magento 1.6 this is configurable.
+						This is the prefix used for install/upgrade scripts
+
+						@see Mage_Core_Model_Resource_Setup::_getAvailableDbFiles()
+						TODO: what models are available?
+					-->
 					<model><![CDATA[mysql4]]></model>
 					<!-- TODO: what types are available? -->
 					<type><![CDATA[pdo_mysql]]></type>
@@ -240,6 +260,9 @@ TODO: provide examples
 				core_setup    (uses default_setup)
 				core_write    (uses default_write)
 				core_read     (uses default_read)
+
+				Access adapter in php:
+				Mage::getSingleton('core/resource')->getConnection('default_read')
 			-->
 			<default_write>
 				<connection>
@@ -285,12 +308,56 @@ TODO: provide examples
 					<!--
 						"class" default to Mage_Core_Model_Resource_Setup and can be overridden here
 
+						Mage_Core_Model_Resource_Setup is the base class for flat models.
+						Use Mage_Eav_Model_Entity_Setup (extends Mage_Core_Model_Resource_Setup) for EAV
+
 						@see Mage_Core_Model_Resource_Setup->applyAllUpdates() (called in Mage_Core_Model_App::_initModules())
 						@see Mage_Core_Model_Resource_Setup->applyDataUpdates() (called in Mage_Core_Model_App::run())
 					-->
 				</setup>
 			</foobar_setup>
 		</resources>
+
+		<cache>
+			<request_processors>
+				<!--
+					Request processors are asked before the actual request is executed by Magento.
+					Magento EE's full page cache makes use of this mechanism (using the request processor class "Enterprise_PageCache_Model_Processor")
+
+					Request processors set in Mage_Core_Model_Cache::__construct() and evaluated in Mage_Core_Model_Cache::processRequest()
+
+					The string defined here needs to be a plain php class name class ids are not allowed here
+
+					The processor must implement following method:
+					$content = $processor->extractContent($content)
+				-->
+				<foobar>Foo_Bar_Model_Processor</foobar>
+			</request_processors>
+
+			<!--
+				TODO: define other cache settings here
+			-->
+		</cache>
+
+		<full_page_cache>
+			<!--
+				Magento EE's full page cache configuration goes here
+			-->
+		</full_page_cache>
+
+		<!--
+			Simple Url rewrites
+
+			@see http://www.excellencemagentoblog.com/simple-url-rewrite-using-magento-xml
+			@see Mage_Core_Controller_Varien_Front->rewrite()
+		-->
+		<rewrite>
+			<fancy_url>
+				<from><![CDATA[/manufacturer\/(.*)/]]></from>
+				<to><![CDATA[manufacturer/index/index/manufacturer/$1/]]></to>
+				<complete>1</complete>
+			</fancy_url>
+		</rewrite>
 
 	</global>
 
@@ -309,6 +376,44 @@ TODO: provide examples
 			Access this configuration using Mage_Core_Model_Config
 			@see Varien_Simplexml_Element
 		-->
+
+		<web>
+			<routers>
+				<!--
+					Registering a new router.
+
+					Don't confuse this with registering a new route and using an existing route, that is
+					done in config/frontend/routers.
+
+					The "admin" and the "standard" routers are configured in Mage_Core. Then there is a hardcoded "default"
+					router that handles 404s and Mage_Cms introduces a new routers using the event "controller_front_init_routers"
+
+					@see Mage_Core_Controller_Varien_Front->init()
+				-->
+				<admin>
+					<disabled>true</disabled><!-- Routers can be disabled like this -->
+					<area>admin</area>
+					<class>Mage_Core_Controller_Varien_Router_Admin</class>
+				</admin>
+				<standard>
+					<area>frontend</area>
+					<class>Mage_Core_Controller_Varien_Router_Standard</class>
+				</standard>
+			</routers>
+		</web>
+
+		<advanced>
+			<modules_disable_output>
+				<Foo_Bar>1</Foo_Bar>
+				<!--
+					Disable output from all block os Foo_Bar. This equals to disabling block output in the backend and
+					can be overriden there. Also note, that this won't deactivate the module, but only prevent blocks
+					from being rendered.
+					To disable a module set config/modules/<moduleName>/active to false
+				-->
+			</modules_disable_output>
+		</advanced>
+
 	</default>
 
 	<!-- TODO: How to add store specific configuration? -->
@@ -323,15 +428,157 @@ TODO: provide examples
 			- Layout xml files
 			- Observer declarations
 		-->
+
+		<events>
+			<!--
+				@see Mage_Core_Model_App::dispatchEvent()
+			-->
+
+			<customer_login><!-- Event key -->
+				<observers>
+					<foobar_login><!-- Key for the listener. Has to be unique. Use your module name as namespace -->
+						<type>model</type>
+						<!--
+							Allowed values are
+							- 'model' or 'object': Will create a new instance of the observer class
+							- 'disabled': Won't execute toe configured listener.
+							- 'singleton' or everything else: Will reuse a singleton instance of the observer. This is
+								the default value if nothing has been specified
+						-->
+						<class>foobar/observer</class>
+						<!--
+							The model can be freely chosen. Usually all listener implementations can be found in an
+							"Observer" class by convention.
+						-->
+						<method>loginListener</method>
+						<!-- Specify the method that should be called on the previously specified object here	 -->
+					</foobar_login>
+
+				</observers>
+			</customer_login>
+		</events>
+
+		<routers>
+			<foobar>
+				<use>standard</use>
+				<!--
+					This defines which front controllers to use. By default following front controllers exist
+					- standard
+					- admin
+					- default
+					- cms
+					TODO: is that correct
+				-->
+				<args>
+					<module>Foo_Bar</module>
+					<!-- Maps to Foo/Bar/controllers/... -->
+					<frontName>foobar</frontName>
+
+					<!--
+						Rewrites (usually done from another module to change or extend the original controller)
+					-->
+					<modules>
+						<Bar_Foo before="Foo_Bar">Bar_Foo_Foobar</Bar_Foo>
+						<!--
+							Maps to Bar/Foo/controllers/Foobar
+							The rest of the directory structure must match the original directory structure
+						-->
+						<!--
+							"before" will lead to your class being asked before the configured on. There also is
+							"after". Use those to control priorities. Having your class inheriting from the original
+							class is a good idea anyways, so "before" will be good in most cases.
+						 -->
+					</modules>
+
+				</args>
+			</foobar>
+		</routers>
+
+		<layout>
+			<updates>
+				<foobar><!-- Can be freely chosen -->
+					<file>foobar/foobar.xml</file>
+					<!--
+						It's a good best practice to group files coming from a module in a separate folder
+					-->
+				</foobar>
+			</updates>
+		</layout>
+
+
 	</frontend>
+
+
 
 	<admin><!-- TODO: where is admin used and where adminhtml? -->
 		<!-- Contains definitions that are only required for the backend -->
+
+		<!--
+			Initialization of the backend router
+
+			@see Mage/Adminhtml/etc/config.xml
+		-->
+		<routers>
+			<adminhtml>
+				<use>admin</use>
+				<args>
+					<module>Mage_Adminhtml</module>
+					<frontName>admin</frontName>
+					<!--
+						This can be overridden (e.g. in local.xml) to choose a different url for the backend
+					-->
+				</args>
+			</adminhtml>
+		</routers>
 	</admin>
+
+	<!--
+		Deprecated!
+
+		Configure this in a separate files adminhtml.xml
+	-->
+	<adminhtml>
+		<menu></menu>
+		<acl></acl>
+	</adminhtml>
+
+
 
 	<catalog>
 		<!-- Contains definitions for Mage_Catalog -->
 	</catalog>
 
 
+
+	<crontab>
+		<jobs>
+			<foobar_examplejob><!-- Choose a crontab key. Prefix with your module name to avoid naming conflicts -->
+				<schedule>
+					<cron_expr>0 1 * * *</cron_expr>
+					<!-- Concrete cron syntax -->
+
+					<!-- or:  -->
+					<config_path>system/foobar/examplejob_cronexpr</config_path>
+					<!--
+						Do not hardcode cron expressions, but make them configurable using the config_path
+						node instead. You can still provide a default value.
+					-->
+
+				</schedule>
+				<run>
+					<model>foobar/cron::exampleJob</model>
+					<!--
+						Here you specificy the class AND the method separated by '::'.
+						This is different to how class and method is specified for event observers
+					-->
+				</run>
+			</foobar_examplejob>
+		</jobs>
+	</crontab>
+
+
 </config>
+
+<!--
+	TODO: see Mage/Page/etc/config.xml for  more configuration parameters (layouts,...)
+-->
