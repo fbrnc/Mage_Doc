@@ -359,6 +359,33 @@ TODO: provide examples
 			</fancy_url>
 		</rewrite>
 
+		<!--
+			Register new product types here.
+
+			Following basic products will be registered in Mage_Catalog
+		-->
+		<catalog>
+			<product>
+				<type>
+					<simple translate="label" module="catalog">
+						<label>Simple Product</label>
+						<model>catalog/product_type_simple</model>
+						<composite>0</composite>
+						<index_priority>10</index_priority>
+					</simple>
+					<grouped translate="label" module="catalog">
+						<!-- ... -->
+					</grouped>
+					<configurable translate="label" module="catalog">
+						<!-- ... -->
+					</configurable>
+					<virtual translate="label" module="catalog">
+						<!-- ... -->
+					</virtual>
+				</type>
+			</product>
+		</catalog>
+
 	</global>
 
 	<default>
